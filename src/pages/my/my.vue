@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { useMemberStore } from '@/stores'
-import '@/utils/http'
+import { http } from '@/utils/http'
 
 const memberStore = useMemberStore()
-const getData = () => {
-  uni.request({
-    url: '/home/banner',
+const getData = async () => {
+  const res = await http({
+    url: '',
     method: 'GET',
+    header: {},
   })
+  console.log(res)
 }
 </script>
 
@@ -18,6 +20,7 @@ const getData = () => {
       @tap="
         memberStore.setProfile({
           nickname: '黑马先锋',
+          token: '12345',
         })
       "
       size="mini"
