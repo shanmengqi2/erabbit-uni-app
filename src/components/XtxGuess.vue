@@ -23,12 +23,19 @@ const getHomeGoodsLikeData = async () => {
   pageParams.value.page++
 }
 
+const reset = () => {
+  guessList.value = []
+  pageParams.value.page = 1
+  totalPage = Number.MAX_SAFE_INTEGER
+}
+
 onMounted(() => {
   getHomeGoodsLikeData()
 })
 
 defineExpose({
   getMore: getHomeGoodsLikeData,
+  reset,
 })
 </script>
 

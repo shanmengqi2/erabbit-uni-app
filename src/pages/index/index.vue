@@ -48,7 +48,13 @@ const isTriggered = ref(false)
 const onRefresherrefresh = async () => {
   // console.log('刷新')
   isTriggered.value = true
-  await Promise.all([getHomeBannerData(), getHomeCategoryData(), getHomeHotData()])
+  guessRef.value?.reset()
+  await Promise.all([
+    getHomeBannerData(),
+    getHomeCategoryData(),
+    getHomeHotData(),
+    guessRef.value?.getMore(),
+  ])
   // 刷新完成后，需要手动关闭刷新动画
   isTriggered.value = false
 }
