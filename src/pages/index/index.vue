@@ -43,11 +43,27 @@ const onScrolltolower = () => {
     guessRef.value?.getMore()
   })
 }
+const isTriggered = ref(false)
+
+const onRefresherrefresh = async () => {
+  // console.log('刷新')
+  isTriggered.value = true
+  await Promise.all([getHomeBannerData(), getHomeCategoryData(), getHomeHotData()])
+  // 刷新完成后，需要手动关闭刷新动画
+  isTriggered.value = false
+}
 </script>
 
 <template>
   <CustomNavbar />
-  <scroll-view @scrolltolower="onScrolltolower" class="scrollview" scroll-y>
+  <scroll-view
+    refresher-enabled
+    @refresherrefresh="onRefresherrefresh"
+    :refresher-triggered="isTriggered"
+    @scrolltolower="onScrolltolower"
+    class="scrollview"
+    scroll-y
+  >
     <XtxSwiper :list="bannerList" />
     <CategoryPanel :list="categoryList" />
     <HotPanel :list="hotList" />
