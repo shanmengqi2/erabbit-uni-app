@@ -4,14 +4,31 @@ import type { PageResult, PageParams } from '@/types/global'
 import type { GuessItem } from '@/types/home'
 import { onMounted, ref } from 'vue'
 
+const pageParams = ref<Required<PageParams>>({
+  page: 1,
+  pageSize: 10,
+})
+let totalPage: number = Number.MAX_SAFE_INTEGER
 const guessList = ref<GuessItem[]>([])
 const getHomeGoodsLikeData = async () => {
-  const res = await getHomeGoodsGuessLikeAPI()
-  guessList.value = res.result.items
+  if (pageParams.value.page >= totalPage) {
+    return uni.showToast({
+      title: '没有更多数据',
+      icon: 'none',
+    })
+  }
+  const res = await getHomeGoodsGuessLikeAPI(pageParams.value)
+  totalPage = res.result.pages
+  guessList.value = [...guessList.value, ...res.result.items]
+  pageParams.value.page++
 }
 
 onMounted(() => {
   getHomeGoodsLikeData()
+})
+
+defineExpose({
+  getMore: getHomeGoodsLikeData,
 })
 </script>
 
@@ -35,7 +52,8 @@ onMounted(() => {
       </view>
     </navigator>
   </view>
-  <view class="loading-text"> 正在加载... </view>
+  <view v-if="pageParams.page >= totalPage" class="loading-text"> 没有更多数据 </view>
+  <view v-else class="loading-text"> 正在加载... </view>
 </template>
 
 <style lang="scss">
@@ -95,6 +113,7 @@ onMounted(() => {
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
   }
   .price {
