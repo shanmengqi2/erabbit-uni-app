@@ -1,5 +1,7 @@
 // /src/pages/hot/hot.vue
 <script setup lang="ts">
+import { getHotRecommendAPI } from '@/services/hot'
+import { onLoad } from '@dcloudio/uni-app'
 // 热门推荐页 标题和url
 const hotMap = [
   { type: '1', title: '特惠推荐', url: '/hot/preference' },
@@ -13,6 +15,15 @@ const query = defineProps<{ type: string }>()
 const hotItem = hotMap.find((item) => item.type === query.type)
 uni.setNavigationBarTitle({
   title: hotItem?.title || '',
+})
+
+const getHotRecommendData = async () => {
+  const res = await getHotRecommendAPI(hotItem!.url)
+  console.log(res)
+}
+
+onLoad(() => {
+  getHotRecommendData()
 })
 </script>
 
