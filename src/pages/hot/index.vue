@@ -12,34 +12,61 @@ const hotMap = [
   { type: '4', title: '新鲜好物', url: '/hot/new' },
 ]
 
-const query = defineProps<{ type: string }>()
-
-const hotItem = hotMap.find((item) => item.type === query.type)
-uni.setNavigationBarTitle({
-  title: hotItem?.title || '',
-})
-
+// 当前热门推荐信息
+const hotItem = ref<typeof hotMap[0] | null>(null)
 const bannerPicture = ref('')
 const subTypes = ref<SubTypeItem[]>([])
 const activeIndex = ref(0)
+
 const getHotRecommendData = async () => {
-  const res = await getHotRecommendAPI(hotItem!.url)
+  if (!hotItem.value) {
+    console.error('hotItem is null, cannot load data')
+    return
+  }
+  const res = await getHotRecommendAPI(hotItem.value.url, {
+    page: import.meta.env.DEV ? 30 : 1,
+    pageSize: 10,
+  })
   bannerPicture.value = res.result.bannerPicture
   subTypes.value = res.result.subTypes
 }
 
-onLoad(() => {
+onLoad((query) => {
+  // 从页面参数中获取 type
+  const type = query?.type
+  if (!type) {
+    console.error('Missing type parameter')
+    return
+  }
+
+  // 查找对应的热门推荐信息
+  const foundItem = hotMap.find((item) => item.type === type)
+  if (!foundItem) {
+    console.error('Invalid type parameter:', type)
+    return
+  }
+
+  hotItem.value = foundItem
+  uni.setNavigationBarTitle({
+    title: foundItem.title,
+  })
+
   getHotRecommendData()
 })
 
 const onScrolltolower = async () => {
   // console.log('滚动到底部')
+  if (!hotItem.value) {
+    console.error('hotItem is undefined, cannot load more data')
+    return
+  }
   const currentSubType = subTypes.value[activeIndex.value]
   if (currentSubType.goodsItems.page >= currentSubType.goodsItems.pages) {
+    uni.showToast({ icon: 'none', title: '没有更多数据了' })
     return
   }
   currentSubType.goodsItems.page++
-  const res = await getHotRecommendAPI(hotItem!.url, {
+  const res = await getHotRecommendAPI(hotItem.value.url, {
     page: currentSubType.goodsItems.page,
     pageSize: currentSubType.goodsItems.pageSize,
     subtype: currentSubType.id,

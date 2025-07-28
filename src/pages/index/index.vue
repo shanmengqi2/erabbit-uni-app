@@ -17,18 +17,32 @@ const bannerList = ref<BannerItem[]>([])
 const getHomeBannerData = async () => {
   const res = await getHomeBannerAPI()
   bannerList.value = res.result
+  bannerList.value = bannerList.value.map((item) => ({
+    ...item,
+    imgUrl: item.imgUrl.replace(/^http:/, 'https:'),
+  }))
 }
 
 const categoryList = ref<CategoryItem[]>([])
 const getHomeCategoryData = async () => {
   const res = await getHomeCategoryAPI()
   categoryList.value = res.result
+  // console.log(categoryList.value)
+  categoryList.value = categoryList.value.map((item) => ({
+    ...item,
+    icon: item.icon.replace(/^http:/, 'https:'),
+  }))
 }
 
 const hotList = ref<HotItem[]>([])
 const getHomeHotData = async () => {
   const res = await getHomeHotAPI()
   hotList.value = res.result
+  hotList.value = hotList.value.map((item) => ({
+    ...item,
+    pictures: item.pictures.map((pic) => pic.replace(/^http:/, 'https:')),
+  }))
+  // console.log(hotList.value)
 }
 
 const isLoading = ref(false)

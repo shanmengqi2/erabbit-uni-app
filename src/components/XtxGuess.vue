@@ -20,6 +20,11 @@ const getHomeGoodsLikeData = async () => {
   const res = await getHomeGoodsGuessLikeAPI(pageParams.value)
   totalPage = res.result.pages
   guessList.value = [...guessList.value, ...res.result.items]
+  // console.log(guessList.value)
+  guessList.value = guessList.value.map((item) => {
+    item.picture = item.picture.replace('http://', 'https://')
+    return item
+  })
   pageParams.value.page++
 }
 
