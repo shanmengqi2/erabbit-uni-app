@@ -31,6 +31,24 @@ const getHotRecommendData = async () => {
 onLoad(() => {
   getHotRecommendData()
 })
+
+const onScrolltolower = async () => {
+  // console.log('滚动到底部')
+  const currentSubType = subTypes.value[activeIndex.value]
+  if (currentSubType.goodsItems.page >= currentSubType.goodsItems.pages) {
+    return
+  }
+  currentSubType.goodsItems.page++
+  const res = await getHotRecommendAPI(hotItem!.url, {
+    page: currentSubType.goodsItems.page,
+    pageSize: currentSubType.goodsItems.pageSize,
+    subtype: currentSubType.id,
+  })
+  currentSubType.goodsItems.items = [
+    ...currentSubType.goodsItems.items,
+    ...res.result.subTypes[activeIndex.value].goodsItems.items,
+  ]
+}
 </script>
 
 <template>
@@ -58,6 +76,7 @@ onLoad(() => {
       v-show="index === activeIndex"
       scroll-y
       class="scroll-view"
+      @scrolltolower="onScrolltolower"
     >
       <view class="goods">
         <navigator
@@ -75,7 +94,9 @@ onLoad(() => {
           </view>
         </navigator>
       </view>
-      <view class="loading-text">正在加载...</view>
+      <view class="loading-text">{{
+        item.goodsItems.page >= item.goodsItems.pages ? '没有更多了' : '正在加载...'
+      }}</view>
     </scroll-view>
   </view>
 </template>
