@@ -12,13 +12,28 @@ const query = defineProps<{
   id: string
 }>()
 
+// 保存商品ID，防止热重载时丢失
+const goodsId = ref<string>(query.id)
+
 const goods = ref<GoodsResult>()
 const getGoodsByIdData = async () => {
-  const res = await getGoodsByIdAPI(query.id)
+  // 确保ID存在且有效
+  if (!goodsId.value) {
+    uni.showToast({
+      icon: 'none',
+      title: '商品ID无效',
+    })
+    return
+  }
+  const res = await getGoodsByIdAPI(goodsId.value)
   goods.value = res.result
 }
 
-onLoad(() => {
+onLoad((options) => {
+  // 热重载时从options中获取ID
+  if (options?.id) {
+    goodsId.value = options.id
+  }
   getGoodsByIdData()
 })
 
@@ -35,6 +50,11 @@ const onTapImage = (url: string) => {
     urls: goods.value!.mainPictures,
   })
 }
+
+const popup = ref<{
+  open: (type?: UniHelper.UniPopupType) => void
+  close: () => void
+}>()
 </script>
 
 <template>
@@ -75,7 +95,7 @@ const onTapImage = (url: string) => {
           <text class="label">送至</text>
           <text class="text ellipsis"> 请选择收获地址 </text>
         </view>
-        <view class="item arrow">
+        <view @tap="popup?.open('bottom')" class="item arrow">
           <text class="label">服务</text>
           <text class="text ellipsis"> 无忧退 快速退款 免费包邮 </text>
         </view>
@@ -145,6 +165,12 @@ const onTapImage = (url: string) => {
       <view class="buynow"> 立即购买 </view>
     </view>
   </view>
+  <!-- uni-ui 弹出层 -->
+  <uni-popup ref="popup" type="bottom" background-color="#fff">
+    <view>内容1</view>
+    <view>内容2</view>
+    <button @tap="popup?.close()">关闭弹出层</button>
+  </uni-popup>
 </template>
 
 <style lang="scss">
