@@ -5,6 +5,7 @@ import { onLoad } from '@dcloudio/uni-app'
 import { ref, watch } from 'vue'
 import { getCategoryTopAPI } from '@/services/category'
 import type { CategoryTopItem, CategoryChildItem } from '@/types/category'
+import PageSkeleton from './components/PageSkeleton.vue'
 
 const activeIndex = ref(0)
 
@@ -32,10 +33,16 @@ const getCategoryTopData = async () => {
   }
 }
 
+// 是否数据加载完毕
+const isFinish = ref(false)
+
 // 页面加载
-onLoad(() => {
-  getBannerData()
-  getCategoryTopData()
+onLoad(async () => {
+  await Promise.all([getBannerData(), getCategoryTopData()]).then(() => {
+    isFinish.value = true
+  })
+  // getBannerData()
+  // getCategoryTopData()
 })
 
 // 提取当前二级分类数据
@@ -46,7 +53,7 @@ watch(activeIndex, (newVal) => {
 </script>
 
 <template>
-  <view class="viewport">
+  <view v-if="isFinish" class="viewport">
     <!-- 搜索框 -->
     <view class="search">
       <view class="input">
@@ -97,6 +104,7 @@ watch(activeIndex, (newVal) => {
       </scroll-view>
     </view>
   </view>
+  <PageSkeleton v-else />
 </template>
 
 <style lang="scss">
