@@ -12,6 +12,7 @@ import XtxGuess from '@/components/XtxGuess.vue'
 import type { XtxGuessInstance } from '@/types/component'
 import { nextTick } from 'vue'
 import PageSkeleton from './components/PageSkeleton.vue'
+import { useGuessList } from '@/composables'
 
 const bannerList = ref<BannerItem[]>([])
 const getHomeBannerData = async () => {
@@ -53,13 +54,14 @@ onLoad(async () => {
   isLoading.value = false
 })
 
-const guessRef = ref<XtxGuessInstance>()
-const onScrolltolower = () => {
-  console.log('滚动到底部')
-  nextTick(() => {
-    guessRef.value?.getMore()
-  })
-}
+// const guessRef = ref<XtxGuessInstance>()
+// const onScrolltolower = () => {
+//   console.log('滚动到底部')
+//   nextTick(() => {
+//     guessRef.value?.getMore()
+//   })
+// }
+const { guessRef, onScrolltolower } = useGuessList()
 const isTriggered = ref(false)
 
 const onRefresherrefresh = async () => {
