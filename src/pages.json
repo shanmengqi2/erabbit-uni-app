@@ -95,5 +95,26 @@
 			// 以Xtx开头的组件，components 文件夹中查找引入
 			"^Xtx(.*)": "@/components/Xtx$1.vue"
 		}
+	},
+	"subPackages": [
+		{
+			"root": "pagesMember",
+			"pages": [
+				{
+					"path": "settings/settings",
+					"style": {
+						"navigationBarTitleText": "设置"
+					}
+				}
+			]
+		}
+	],
+	"preloadRule": {
+		"pages/my/my": {
+			"network": "all",
+			"packages": [
+				"pagesMember"
+			]
+		}
 	}
 }
