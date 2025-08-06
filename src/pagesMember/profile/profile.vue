@@ -2,7 +2,7 @@
 import { getMemberProfileAPI, putMemberProfileAPI } from '@/services/profile'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
-import type { ProfileDetail } from '@/types/member'
+import type { ProfileDetail, Gender } from '@/types/member'
 import { useMemberStore } from '@/stores/modules/member'
 
 const memberStore = useMemberStore()
@@ -54,14 +54,38 @@ const changeAvatar = () => {
     },
   })
 }
+// 修改性别
+const onGenderChange: UniHelper.RadioGroupOnChange = (e) => {
+  profile.value.gender = e.detail.value as Gender
+}
+
+// 修改生日
+const onBirthdayChange: UniHelper.DatePickerOnChange = (e) => {
+  profile.value.birthday = e.detail.value
+}
+
+// 修改城市
+let fullLocationCode: [string, string, string] = ['', '', '']
+const onRegionChange: UniHelper.RegionPickerOnChange = (e) => {
+  // const provinceCode = e.detail.code![0]
+  // const cityCode = e.detail.code![1]
+  // const countyCode = e.detail.code![2]
+  fullLocationCode = e.detail.code!
+  // profile.value.fullLocation = e.detail.value[0] + ' ' + e.detail.value[1] + ' ' + e.detail.value[2]
+  profile.value.fullLocation = e.detail.value.join(' ')
+}
 
 // 点击保存
 const onSubmit = async () => {
+  const { nickname, gender, birthday, profession } = profile.value
   const res = await putMemberProfileAPI({
-    nickname: profile.value?.nickname,
-    // gender: profile.value?.gender,
-    // birthday: profile.value?.birthday,
-    // profession: profile.value?.profession,
+    nickname,
+    gender,
+    birthday,
+    profession,
+    provinceCode: fullLocationCode[0],
+    cityCode: fullLocationCode[1],
+    countyCode: fullLocationCode[2],
   })
   uni.showToast({
     icon: 'success',
@@ -107,7 +131,7 @@ const onSubmit = async () => {
         </view>
         <view class="form-item">
           <text class="label">性别</text>
-          <radio-group>
+          <radio-group @change="onGenderChange">
             <label class="radio">
               <radio value="男" color="#27ba9b" :checked="profile?.gender === '男'" />
               男
@@ -126,6 +150,7 @@ const onSubmit = async () => {
             start="1900-01-01"
             :end="new Date()"
             :value="profile?.birthday"
+            @change="onBirthdayChange"
           >
             <view v-if="profile?.birthday">{{ profile?.birthday }}</view>
             <view class="placeholder" v-else>请选择日期</view>
@@ -137,6 +162,7 @@ const onSubmit = async () => {
             class="picker"
             mode="region"
             :value="profile?.fullLocation?.split(' ') || ['广东省', '广州市', '天河区']"
+            @change="onRegionChange"
           >
             <view v-if="profile?.fullLocation">{{ profile?.fullLocation }}</view>
             <view class="placeholder" v-else>请选择城市</view>
