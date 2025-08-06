@@ -67,11 +67,7 @@ const onBirthdayChange: UniHelper.DatePickerOnChange = (e) => {
 // 修改城市
 let fullLocationCode: [string, string, string] = ['', '', '']
 const onRegionChange: UniHelper.RegionPickerOnChange = (e) => {
-  // const provinceCode = e.detail.code![0]
-  // const cityCode = e.detail.code![1]
-  // const countyCode = e.detail.code![2]
   fullLocationCode = e.detail.code!
-  // profile.value.fullLocation = e.detail.value[0] + ' ' + e.detail.value[1] + ' ' + e.detail.value[2]
   profile.value.fullLocation = e.detail.value.join(' ')
 }
 
@@ -99,7 +95,6 @@ const onSubmit = async () => {
   setTimeout(() => {
     uni.navigateBack()
   }, 1000)
-  // console.log(res)
 }
 </script>
 
