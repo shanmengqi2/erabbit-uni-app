@@ -3,6 +3,10 @@ import { getMemberProfileAPI, putMemberProfileAPI } from '@/services/profile'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import type { ProfileDetail } from '@/types/member'
+import { useMemberStore } from '@/stores/modules/member'
+
+const memberStore = useMemberStore()
+const newProfile = memberStore.profile
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -38,6 +42,7 @@ const changeAvatar = () => {
             uni.showToast({
               title: '上传成功',
             })
+            newProfile!.avatar = avatar
           } else {
             uni.showToast({
               icon: 'error',
@@ -62,7 +67,15 @@ const onSubmit = async () => {
     icon: 'success',
     title: '保存成功',
   })
-  console.log(res)
+
+  // 更新pinia
+  newProfile!.nickname = res.result.nickname
+
+  // 跳转回上一页
+  setTimeout(() => {
+    uni.navigateBack()
+  }, 1000)
+  // console.log(res)
 }
 </script>
 
