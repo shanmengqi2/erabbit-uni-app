@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { getMemberAddressByIdAPI, postMemberAddressAPI } from '@/services/address'
+import {
+  getMemberAddressByIdAPI,
+  postMemberAddressAPI,
+  putMemberAddressByIdAPI,
+} from '@/services/address'
 import { onLoad } from '@dcloudio/uni-app'
 // import type { AddressItem } from '@/types/address';
 
@@ -86,6 +90,11 @@ const onSubmit = async () => {
   // 提交表单
   if (query.id) {
     // 编辑地址 todo
+    await putMemberAddressByIdAPI(query.id, form.value)
+    uni.showToast({
+      title: '编辑成功',
+      icon: 'success',
+    })
   } else {
     // 新增地址
     await postMemberAddressAPI(form.value)
