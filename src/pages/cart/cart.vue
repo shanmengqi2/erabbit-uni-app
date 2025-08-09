@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import { useMemberStore } from '@/stores'
-import { getMemberCartAPI } from '@/services/cart'
+import {
+  getMemberCartAPI,
+  deleteMemberCartAPI,
+  putMemberCartBySkuIdAPI,
+  putMemberCartSelectedAPI,
+} from '@/services/cart'
 import { onShow } from '@dcloudio/uni-app'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import type { CartItem } from '@/services/cart.d'
+import vkDataInputNumberBox from '@/components/vk-data-input-number-box/vk-data-input-number-box.vue'
+import type { InputNumberBoxEvent } from '@/components/vk-data-input-number-box/vk-data-input-number-box'
 
 // 获取会员Store
 const memberStore = useMemberStore()
@@ -13,6 +20,23 @@ const cartList = ref<CartItem[]>([])
 const getMemberCartData = async () => {
   const res = await getMemberCartAPI()
   cartList.value = res.result
+}
+
+// 删除购物车商品
+const deleteCartItem = (item: CartItem) => {
+  // 弹出模态框二次确认
+  uni.showModal({
+    title: '提示',
+    content: '确认删除该商品吗？',
+    success: async (res) => {
+      if (res.confirm) {
+        // 调用删除接口
+        await deleteMemberCartAPI({ ids: [item.skuId] })
+        // 重新获取购物车数据
+        getMemberCartData()
+      }
+    },
+  })
 }
 
 // 控制 scroll-view 滚动位置
@@ -28,6 +52,45 @@ onShow(() => {
       scrollTop.value = 0
     }, 100)
   }
+})
+
+const onChangeCount = (ev: InputNumberBoxEvent) => {
+  putMemberCartBySkuIdAPI(ev.index, {
+    count: ev.value,
+  })
+}
+
+// 商品选中状态改变
+const onCheckItem = async (item: CartItem) => {
+  item.selected = !item.selected
+  // 发送请求修改选中状态
+  await putMemberCartBySkuIdAPI(item.skuId, {
+    selected: item.selected,
+  })
+}
+
+// 计算全选状态
+const isCheckAll = computed(() => {
+  return cartList.value.every((item) => item.selected)
+})
+
+// 全选反选
+const onCheckAll = async () => {
+  const newValue = !isCheckAll.value
+  cartList.value.forEach((item) => {
+    item.selected = newValue
+  })
+  // 发送请求修改全选状态
+  await putMemberCartSelectedAPI({
+    selected: newValue,
+  })
+}
+
+// 计算总价
+const totalPrice = computed(() => {
+  return cartList.value
+    .filter((item) => item.selected)
+    .reduce((pre, cur) => pre + cur.nowPrice * cur.count, 0)
 })
 </script>
 
@@ -52,7 +115,7 @@ onShow(() => {
               <text
                 class="checkbox"
                 :class="{ checked: item.selected }"
-                @tap="item.selected = !item.selected"
+                @tap="onCheckItem(item)"
               ></text>
               <navigator
                 :url="`/pages/goods/goods?id=${item.id}`"
@@ -63,26 +126,24 @@ onShow(() => {
                 <view class="meta">
                   <view class="name ellipsis">{{ item.name }}</view>
                   <view class="attrsText ellipsis">{{ item.attrsText }}</view>
-                  <view class="price">¥{{ item.nowPrice }}</view>
+                  <view class="price">{{ item.nowPrice }}</view>
                 </view>
               </navigator>
               <!-- 商品数量 -->
               <view class="count">
-                <text class="text">-</text>
-                <input
-                  class="input"
-                  type="number"
-                  :value="item.count.toString()"
-                  @change="item.count = Number($event.detail.value)"
-                  @input="item.count = Number($event.detail.value)"
+                <vk-data-input-number-box
+                  v-model="item.count"
+                  @change="onChangeCount"
+                  :min="1"
+                  :max="item.stock"
+                  :index="item.skuId"
                 />
-                <text class="text">+</text>
               </view>
             </view>
             <!-- 右侧删除按钮 -->
             <template #right>
               <view class="cart-swipe-right">
-                <button class="button delete-button">删除</button>
+                <button class="button delete-button" @tap="deleteCartItem(item)">删除</button>
               </view>
             </template>
           </uni-swipe-action-item>
@@ -98,9 +159,9 @@ onShow(() => {
       </view>
       <!-- 吸底工具栏 -->
       <view class="toolbar">
-        <text class="all" :class="{ checked: true }">全选</text>
+        <text class="all" :class="{ checked: isCheckAll }" @tap="onCheckAll">全选</text>
         <text class="text">合计:</text>
-        <text class="amount">100</text>
+        <text class="amount">{{ totalPrice }}</text>
         <view class="button-grounp">
           <view class="button payment-button" :class="{ disabled: true }"> 去结算(10) </view>
         </view>
