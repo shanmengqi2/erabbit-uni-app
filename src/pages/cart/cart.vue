@@ -86,6 +86,11 @@ const onCheckAll = async () => {
   })
 }
 
+// 计算选中商品数量
+const selectedCount = computed(() => {
+  return cartList.value.filter((item) => item.selected).reduce((pre, cur) => pre + cur.count, 0)
+})
+
 // 计算总价
 const totalPrice = computed(() => {
   return cartList.value
@@ -163,7 +168,9 @@ const totalPrice = computed(() => {
         <text class="text">合计:</text>
         <text class="amount">{{ totalPrice }}</text>
         <view class="button-grounp">
-          <view class="button payment-button" :class="{ disabled: true }"> 去结算(10) </view>
+          <view class="button payment-button" :class="{ disabled: selectedCount === 0 }">
+            去结算({{ selectedCount }})
+          </view>
         </view>
       </view>
     </template>
