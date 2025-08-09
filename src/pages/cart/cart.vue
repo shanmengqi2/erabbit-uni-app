@@ -96,7 +96,20 @@ const totalPrice = computed(() => {
   return cartList.value
     .filter((item) => item.selected)
     .reduce((pre, cur) => pre + cur.nowPrice * cur.count, 0)
+    .toFixed(2)
 })
+
+// 结算
+const toPay = () => {
+  if (selectedCount.value === 0) {
+    uni.showToast({
+      icon: 'none',
+      title: '请选择商品',
+    })
+    return
+  }
+  // todo 结算
+}
 </script>
 
 <template>
@@ -168,7 +181,11 @@ const totalPrice = computed(() => {
         <text class="text">合计:</text>
         <text class="amount">{{ totalPrice }}</text>
         <view class="button-grounp">
-          <view class="button payment-button" :class="{ disabled: selectedCount === 0 }">
+          <view
+            class="button payment-button"
+            :class="{ disabled: selectedCount === 0 }"
+            @tap="toPay"
+          >
             去结算({{ selectedCount }})
           </view>
         </view>
