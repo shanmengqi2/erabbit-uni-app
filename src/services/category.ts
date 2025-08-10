@@ -1,6 +1,6 @@
 // src/services/category.ts
 import { http } from '@/utils/http'
-import type { CategoryChildItem, CategoryTopItem } from '@/types/category'
+import type { CategoryTopItem } from '@/types/category'
 /**
  * 分类列表-小程序
  */

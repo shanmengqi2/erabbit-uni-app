@@ -11,6 +11,7 @@ import { ref, computed } from 'vue'
 import type { CartItem } from '@/services/cart.d'
 import vkDataInputNumberBox from '@/components/vk-data-input-number-box/vk-data-input-number-box.vue'
 import type { InputNumberBoxEvent } from '@/components/vk-data-input-number-box/vk-data-input-number-box'
+import { useGuessList } from '@/composables'
 
 // 接收父组件传递的安全区域距离
 const props = defineProps<{
@@ -118,10 +119,17 @@ const toPay = () => {
     url: '/pagesOrder/create/create',
   })
 }
+
+const { guessRef, onScrolltolower } = useGuessList()
 </script>
 
 <template>
-  <scroll-view scroll-y class="scroll-view" :scroll-top="scrollTop">
+  <scroll-view
+    scroll-y
+    class="scroll-view"
+    :scroll-top="scrollTop"
+    @scrolltolower="onScrolltolower"
+  >
     <!-- 已登录: 显示购物车 -->
     <template v-if="memberStore.profile">
       <!-- 购物车列表 -->

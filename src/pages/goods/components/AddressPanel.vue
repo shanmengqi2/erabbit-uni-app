@@ -1,11 +1,7 @@
 // AddressPanel.vue
 <script setup lang="ts">
 import { useAddressStore } from '@/stores/modules/address'
-import { useMemberStore } from '@/stores/modules/member'
-import { getMemberAddressAPI } from '@/services/address'
-import { ref } from 'vue'
 import type { AddressItem } from '@/types/address.d'
-import { onLoad, onShow } from '@dcloudio/uni-app'
 // 子组件调用父组件方法
 const emit = defineEmits<{
   (e: 'close'): void
@@ -18,16 +14,6 @@ const emit = defineEmits<{
 defineProps<{
   addressList: AddressItem[]
 }>()
-
-// const addressList = ref<AddressItem[]>([])
-// const getAddressList = async () => {
-//   const res = await getMemberAddressAPI()
-//   addressList.value = res.result
-// }
-// onShow(() => {
-//   getAddressList()
-//   console.log('地址列表', addressList.value)
-// })
 
 // 选择地址
 const selectAddress = (item: AddressItem) => {
@@ -64,16 +50,6 @@ const onAddAddress = async () => {
           <!-- {{ item.isDefault ? '默认' : '' }} -->
         </text>
       </view>
-      <!-- <view class="item">
-        <view class="user">王东 13824686868</view>
-        <view class="address">北京市顺义区后沙峪地区安平北街6号院</view>
-        <text class="icon icon-ring"></text>
-      </view>
-      <view class="item">
-        <view class="user">张三 13824686868</view>
-        <view class="address">北京市朝阳区孙河安平北街6号院</view>
-        <text class="icon icon-ring"></text>
-      </view> -->
     </view>
     <view class="footer">
       <view class="button primary" @tap="onAddAddress"> 新建地址 </view>
