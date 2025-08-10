@@ -114,6 +114,9 @@ const toPay = () => {
     return
   }
   // todo 结算
+  uni.navigateTo({
+    url: '/pagesOrder/create/create',
+  })
 }
 </script>
 
