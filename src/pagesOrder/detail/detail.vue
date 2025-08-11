@@ -6,6 +6,7 @@ import { onLoad, onReady } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import { OrderState, orderStateList } from '@/services/constants'
 import PageSkeleton from './PageSkeleton.vue'
+import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -74,6 +75,27 @@ const getMemberOrderByIdData = async () => {
 onLoad(() => {
   getMemberOrderByIdData()
 })
+
+// 倒计时结束事件
+const onTimeUp = () => {
+  // 订单状态改为已取消
+  order.value!.orderState = OrderState.YiQuXiao
+}
+
+// 订单支付
+const onOrderPay = async () => {
+  if (import.meta.env.DEV) {
+    const res = await getPayMockAPI({ orderId: query.id })
+  } else {
+    const res = await getPayWxPayMiniPayAPI({ orderId: query.id })
+    wx.requestPayment(res.result)
+  }
+
+  // 关闭当前页，跳转支付结果页
+  uni.redirectTo({
+    url: `/pagesOrder/payment/payment?id=${query.id}`,
+  })
+}
 </script>
 
 <template>
@@ -100,9 +122,16 @@ onLoad(() => {
           <view class="tips">
             <text class="money">应付金额: ¥ 99.00</text>
             <text class="time">支付剩余</text>
-            00 时 29 分 59 秒
+            <uni-countdown
+              :second="order.countdown"
+              :show-day="false"
+              :color="'#fff'"
+              @timeup="onTimeUp"
+              :show-colon="false"
+              :splitor-color="'#fff'"
+            />
           </view>
-          <view class="button">去支付</view>
+          <view class="button" @tap="onOrderPay">去支付</view>
         </template>
         <!-- 其他订单状态:展示再次购买按钮 -->
         <template v-else>
