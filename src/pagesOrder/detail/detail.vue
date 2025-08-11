@@ -7,7 +7,7 @@ import { ref } from 'vue'
 import { OrderState, orderStateList } from '@/services/constants'
 import PageSkeleton from './PageSkeleton.vue'
 import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
-import { getMemberOrderConsignmentByIdAPI } from '@/services/order'
+import { getMemberOrderConsignmentByIdAPI, putMemberOrderReceiptByIdAPI } from '@/services/order'
 
 // 判断是否开发环境
 const isDev = import.meta.env.DEV
@@ -106,6 +106,21 @@ const onConsignment = async () => {
   await getMemberOrderConsignmentByIdAPI(query.id)
   // 刷新订单详情
   getMemberOrderByIdData()
+}
+
+// 确认收货
+const onOrderReceipt = async () => {
+  uni.showModal({
+    title: '提示',
+    content: '确认收货吗？',
+    success: async (res) => {
+      if (res.confirm) {
+        await putMemberOrderReceiptByIdAPI(query.id)
+        // 刷新订单详情
+        getMemberOrderByIdData()
+      }
+    },
+  })
 }
 </script>
 
@@ -210,7 +225,7 @@ const onConsignment = async () => {
             </view>
           </navigator>
           <!-- 待评价状态:展示按钮 -->
-          <view class="action" v-if="true">
+          <view class="action" v-if="order?.orderState === OrderState.DaiPingJia">
             <view class="button primary">申请售后</view>
             <navigator url="" class="button"> 去评价 </navigator>
           </view>
@@ -250,7 +265,7 @@ const onConsignment = async () => {
       <view class="toolbar-height" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }"></view>
       <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
         <!-- 待付款状态:展示支付按钮 -->
-        <template v-if="true">
+        <template v-if="order?.orderState === OrderState.DaiFuKuan">
           <view class="button primary"> 去支付 </view>
           <view class="button" @tap="popup?.open?.()"> 取消订单 </view>
         </template>
@@ -264,11 +279,26 @@ const onConsignment = async () => {
             再次购买
           </navigator>
           <!-- 待收货状态: 展示确认收货 -->
-          <view class="button primary"> 确认收货 </view>
+          <view
+            @tap="onOrderReceipt"
+            class="button primary"
+            v-if="order?.orderState === OrderState.DaiShouHuo"
+          >
+            确认收货
+          </view>
           <!-- 待评价状态: 展示去评价 -->
-          <view class="button"> 去评价 </view>
+          <view class="button" v-if="order?.orderState === OrderState.DaiPingJia"> 去评价 </view>
           <!-- 待评价/已完成/已取消 状态: 展示删除订单 -->
-          <view class="button delete"> 删除订单 </view>
+          <view
+            class="button delete"
+            v-if="
+              order?.orderState === OrderState.DaiPingJia ||
+              order?.orderState === OrderState.YiWanCheng ||
+              order?.orderState === OrderState.YiQuXiao
+            "
+          >
+            删除订单
+          </view>
         </template>
       </view>
     </template>

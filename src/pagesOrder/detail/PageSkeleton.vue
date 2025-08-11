@@ -80,11 +80,12 @@
             </view>
           </navigator>
           <view class="action action">
-            <view
-              class="button primary sk-transparent sk-text-29-0323-997 sk-text"
+            <navigator
+              class="button sk-transparent sk-text-29-0323-851 sk-text"
               style="background-position-x: 50%"
-              >申请售后</view
             >
+              申请售后
+            </navigator>
             <navigator
               class="button sk-transparent sk-text-29-0323-851 sk-text"
               style="background-position-x: 50%"
