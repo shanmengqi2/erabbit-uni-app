@@ -7,7 +7,10 @@ import { ref } from 'vue'
 import { OrderState, orderStateList } from '@/services/constants'
 import PageSkeleton from './PageSkeleton.vue'
 import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
+import { getMemberOrderConsignmentByIdAPI } from '@/services/order'
 
+// 判断是否开发环境
+const isDev = import.meta.env.DEV
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 // 猜你喜欢
@@ -96,6 +99,14 @@ const onOrderPay = async () => {
     url: `/pagesOrder/payment/payment?id=${query.id}`,
   })
 }
+
+// 模拟发货
+const onConsignment = async () => {
+  if (!isDev) return
+  await getMemberOrderConsignmentByIdAPI(query.id)
+  // 刷新订单详情
+  getMemberOrderByIdData()
+}
 </script>
 
 <template>
@@ -146,7 +157,13 @@ const onOrderPay = async () => {
               再次购买
             </navigator>
             <!-- 待发货状态：模拟发货,开发期间使用,用于修改订单状态为已发货 -->
-            <view v-if="false" class="button"> 模拟发货 </view>
+            <view
+              v-if="order.orderState === OrderState.DaiFaHuo && isDev"
+              class="button"
+              @tap="onConsignment"
+            >
+              模拟发货
+            </view>
           </view>
         </template>
       </view>
