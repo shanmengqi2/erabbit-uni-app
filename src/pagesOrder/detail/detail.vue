@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { useGuessList } from '@/composables'
-import type { OrderResult } from '@/services/order.d'
+import type { LogisticItem, OrderResult } from '@/services/order.d'
 import { getMemberOrderByIdAPI } from '@/services/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import { OrderState, orderStateList } from '@/services/constants'
 import PageSkeleton from './PageSkeleton.vue'
 import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
-import { getMemberOrderConsignmentByIdAPI, putMemberOrderReceiptByIdAPI } from '@/services/order'
+import {
+  getMemberOrderConsignmentByIdAPI,
+  putMemberOrderReceiptByIdAPI,
+  getMemberOrderLogisticsByIdAPI,
+} from '@/services/order'
+import type { OrderLogisticResult } from '@/services/order.d'
 
 // 判断是否开发环境
 const isDev = import.meta.env.DEV
@@ -73,6 +78,13 @@ const order = ref<OrderResult>()
 const getMemberOrderByIdData = async () => {
   const res = await getMemberOrderByIdAPI(query.id)
   order.value = res.result
+  if (
+    [OrderState.DaiShouHuo, OrderState.DaiPingJia, OrderState.YiWanCheng].includes(
+      order.value.orderState,
+    )
+  ) {
+    getMemberOrderLogisticsByIdData()
+  }
 }
 
 onLoad(() => {
@@ -121,6 +133,13 @@ const onOrderReceipt = async () => {
       }
     },
   })
+}
+
+// 获取物流信息
+const logisitcData = ref<LogisticItem[]>([])
+const getMemberOrderLogisticsByIdData = async () => {
+  const res = await getMemberOrderLogisticsByIdAPI(query.id)
+  logisitcData.value = res.result.list
 }
 </script>
 
@@ -185,16 +204,16 @@ const onOrderReceipt = async () => {
       <!-- 配送状态 -->
       <view class="shipment">
         <!-- 订单物流信息 -->
-        <view v-for="item in 1" :key="item" class="item">
+        <view v-for="item in logisitcData" :key="item.id" class="item">
           <view class="message">
-            您已在广州市天河区黑马程序员完成取件，感谢使用菜鸟驿站，期待再次为您服务。
+            {{ item.text }}
           </view>
-          <view class="date"> 2023-04-14 13:14:20 </view>
+          <view class="date"> {{ item.time }} </view>
         </view>
         <!-- 用户收货地址 -->
         <view class="locate">
-          <view class="user"> 张三 13333333333 </view>
-          <view class="address"> 广东省 广州市 天河区 黑马程序员 </view>
+          <view class="user"> {{ order.receiverContact }} {{ order.receiverMobile }} </view>
+          <view class="address"> {{ order.receiverAddress }} </view>
         </view>
       </view>
 
