@@ -1,8 +1,18 @@
 <script setup lang="ts">
-import { getMemberOrderPreAPI, getMemberOrderPreNowAPI, postMemberOrderAPI } from '@/services/order'
+import {
+  getMemberOrderPreAPI,
+  getMemberOrderPreNowAPI,
+  postMemberOrderAPI,
+  getMemberOrderRepurchaseByIdAPI,
+} from '@/services/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
-import type { OrderPreResult, OrderCreateParams, OrderCreateResult } from '@/services/order.d'
+import type {
+  OrderPreResult,
+  OrderCreateParams,
+  OrderCreateResult,
+  OrderResult,
+} from '@/services/order.d'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -26,6 +36,7 @@ const onChangeDelivery: UniHelper.SelectorPickerOnChange = (ev) => {
 const query = defineProps<{
   skuId?: string
   count?: string
+  orderId?: string
 }>()
 
 // 获取订单信息
@@ -36,6 +47,9 @@ const getMemberOrderPreData = async () => {
       skuId: query.skuId,
       count: query.count,
     })
+    orderPre.value = res.result
+  } else if (query.orderId) {
+    const res = await getMemberOrderRepurchaseByIdAPI(query.orderId)
     orderPre.value = res.result
   } else {
     const res = await getMemberOrderPreAPI()
