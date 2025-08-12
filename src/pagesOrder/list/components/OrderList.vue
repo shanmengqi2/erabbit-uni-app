@@ -23,9 +23,11 @@ const queryParams: OrderListParams = {
 
 // 获取订单列表
 const orderList = ref<OrderItem[]>([])
+const totalPage = ref(0)
 const getMemberOrderData = async () => {
   const res = await getMemberOrderAPI(queryParams)
   orderList.value = res.result.items
+  totalPage.value = res.result.pages
 }
 
 onMounted(() => {
@@ -45,11 +47,22 @@ const onOrderPay = async (id: string) => {
   uni.showToast({ title: '支付成功' })
   orderList.value.find((item) => item.id === id)!.orderState = OrderState.DaiFaHuo
 }
+
+// 加载更多
+const onScrolltolower = async () => {
+  queryParams.page!++
+  if (queryParams.page! > totalPage.value) {
+    uni.showToast({ title: '没有更多数据' })
+    return
+  }
+  const res = await getMemberOrderAPI(queryParams)
+  orderList.value.push(...res.result.items)
+}
 </script>
 
 <template>
   {{ props.orderState }}
-  <scroll-view scroll-y class="orders">
+  <scroll-view scroll-y class="orders" @scrolltolower="onScrolltolower">
     <view class="card" v-for="order in orderList" :key="order.id">
       <!-- 订单信息 -->
       <view class="status">
