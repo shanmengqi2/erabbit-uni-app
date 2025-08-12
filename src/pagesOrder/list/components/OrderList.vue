@@ -3,6 +3,7 @@ import { OrderState } from '@/services/constants'
 import { orderStateList } from '@/services/constants'
 import { getMemberOrderAPI } from '@/services/order'
 import type { OrderItem, OrderListParams } from '@/services/order.d.ts'
+import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 import { onMounted, ref } from 'vue'
 
 // 获取屏幕边界到安全区域距离
@@ -31,6 +32,19 @@ onMounted(() => {
   getMemberOrderData()
   console.log(props.orderState)
 })
+
+// 支付
+const onOrderPay = async (id: string) => {
+  if (import.meta.env.DEV) {
+    await getPayMockAPI({ orderId: id })
+  } else {
+    const res = await getPayWxPayMiniPayAPI({ orderId: '123' })
+    wx.requestPayment(res.result)
+  }
+  // uni.redirectTo({ url: `/pagesOrder/payment/payment?id=${id}` })
+  uni.showToast({ title: '支付成功' })
+  orderList.value.find((item) => item.id === id)!.orderState = OrderState.DaiFaHuo
+}
 </script>
 
 <template>
@@ -71,12 +85,12 @@ onMounted(() => {
       <view class="action">
         <!-- 待付款状态：显示去支付按钮 -->
         <template v-if="order.orderState === OrderState.DaiFuKuan">
-          <view class="button primary">去支付</view>
+          <view class="button primary" @tap="onOrderPay(order.id)">去支付</view>
         </template>
         <template v-else>
           <navigator
             class="button secondary"
-            :url="`/pagesOrder/create/create?orderId=id`"
+            :url="`/pagesOrder/create/create?orderId=${order.id}`"
             hover-class="none"
           >
             再次购买
