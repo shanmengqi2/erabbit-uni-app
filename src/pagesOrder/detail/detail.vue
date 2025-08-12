@@ -12,6 +12,7 @@ import {
   putMemberOrderReceiptByIdAPI,
   getMemberOrderLogisticsByIdAPI,
   deleteMemberOrderAPI,
+  getMemberOrderCancelByIdAPI,
 } from '@/services/order'
 import type { OrderLogisticResult } from '@/services/order.d'
 
@@ -166,6 +167,24 @@ const onDeleteOrder = () => {
     })
   }
 }
+
+// 取消订单
+const onCancelOrder = async () => {
+  if (order.value!.orderState !== OrderState.DaiFuKuan) return
+  uni.showModal({
+    title: '提示',
+    content: '确认取消订单吗？',
+    success: async (res) => {
+      if (res.confirm) {
+        await getMemberOrderCancelByIdAPI(query.id, { cancelReason: reason.value })
+        // 刷新订单详情
+        getMemberOrderByIdData()
+        // 关闭弹窗
+        popup.value?.close?.()
+      }
+    },
+  })
+}
 </script>
 
 <template>
@@ -190,7 +209,7 @@ const onDeleteOrder = () => {
         <template v-if="order?.orderState === OrderState.DaiFuKuan">
           <view class="status icon-clock">等待付款</view>
           <view class="tips">
-            <text class="money">应付金额: ¥ 99.00</text>
+            <text class="money">应付金额: ¥ {{ order.totalMoney }}</text>
             <text class="time">支付剩余</text>
             <uni-countdown
               :second="order.countdown"
@@ -362,7 +381,7 @@ const onDeleteOrder = () => {
       </view>
       <view class="footer">
         <view class="button" @tap="popup?.close?.()">取消</view>
-        <view class="button primary">确认</view>
+        <view class="button primary" @tap="onCancelOrder">确认</view>
       </view>
     </view>
   </uni-popup>
