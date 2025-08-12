@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 
 // 获取屏幕边界到安全区域距离
@@ -12,8 +13,12 @@ const orderTabs = ref([
   { orderState: 4, title: '待评价' },
 ])
 
+const query = defineProps<{
+  type: string
+}>()
+
 // 高亮下标
-const activeIndex = ref(0)
+const activeIndex = ref(orderTabs.value.findIndex((item) => item.orderState === Number(query.type)))
 </script>
 
 <template>
